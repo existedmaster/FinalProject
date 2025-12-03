@@ -32,12 +32,12 @@ from sqlalchemy.orm import Session  # SQLAlchemy database session
 import uvicorn  # ASGI server for running FastAPI apps
 
 # Application imports
-from app.auth.dependencies import get_current_active_user  # Authentication dependency
+from app.auth.dependencies import get_current_active_user, get_current_db_user  # Authentication dependency
 from app.models.calculation import Calculation  # Database model for calculations
 from app.models.user import User  # Database model for users
 from app.schemas.calculation import CalculationBase, CalculationResponse, CalculationUpdate  # API request/response schemas
 from app.schemas.token import TokenResponse  # API token schema
-from app.schemas.user import UserCreate, UserResponse, UserLogin  # User schemas
+from app.schemas.user import UserCreate, UserResponse, UserLogin, UserUpdate, PasswordUpdate  # User schemas
 from app.database import Base, get_db, engine  # Database connection
 
 
@@ -112,6 +112,11 @@ def register_page(request: Request):
     Displays a form for new users to create an account.
     """
     return templates.TemplateResponse("register.html", {"request": request})
+
+@app.get("/profile", response_class=HTMLResponse, tags=["web"])
+def profile_page(request: Request):
+    """Profile management page for updating account details and password."""
+    return templates.TemplateResponse("profile.html", {"request": request})
 
 @app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
 def dashboard_page(request: Request):
@@ -254,6 +259,92 @@ def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
         "access_token": auth_result["access_token"],
         "token_type": "bearer"
     }
+
+# ------------------------------------------------------------------------------
+# User Profile Endpoints
+# ------------------------------------------------------------------------------
+@app.get("/users/me", response_model=UserResponse, tags=["users"])
+def read_current_user_profile(
+    current_user: User = Depends(get_current_db_user)
+):
+    """Return the authenticated user's profile data."""
+    return current_user
+
+@app.put("/users/me", response_model=UserResponse, tags=["users"])
+def update_current_user_profile(
+    user_update: UserUpdate,
+    current_user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update profile fields for the authenticated user.
+    Supports username, email, first_name, and last_name updates with uniqueness checks.
+    """
+    updates = {
+        key: value for key, value in user_update.model_dump(exclude_unset=True).items()
+        if value is not None
+    }
+
+    if not updates:
+        return current_user
+
+    if "email" in updates:
+        email_exists = db.query(User).filter(
+            User.email == updates["email"],
+            User.id != current_user.id
+        ).first()
+        if email_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already in use"
+            )
+
+    if "username" in updates:
+        username_exists = db.query(User).filter(
+            User.username == updates["username"],
+            User.id != current_user.id
+        ).first()
+        if username_exists:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already in use"
+            )
+
+    try:
+        current_user.update(**updates)
+        db.commit()
+        db.refresh(current_user)
+        return current_user
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update profile"
+        )
+
+@app.put("/users/me/password", tags=["users"])
+def change_password(
+    password_update: PasswordUpdate,
+    current_user: User = Depends(get_current_db_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Change the authenticated user's password after verifying the current password.
+    """
+    if not current_user.verify_password(password_update.current_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+
+    hashed_password = User.hash_password(password_update.new_password)
+    current_user.update(password=hashed_password)
+    db.commit()
+    db.refresh(current_user)
+    return {"message": "Password updated successfully"}
 
 
 # ------------------------------------------------------------------------------

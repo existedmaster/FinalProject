@@ -1,9 +1,13 @@
 from datetime import datetime
 from uuid import UUID
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from app.schemas.user import UserResponse
+from sqlalchemy.orm import Session
+
+from app.database import get_db
 from app.models.user import User
+from app.schemas.user import UserResponse
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -79,3 +83,44 @@ def get_current_active_user(
             detail="Inactive user"
         )
     return current_user
+
+def get_current_db_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+) -> User:
+    """
+    Dependency that returns the actual User model from the database.
+
+    Uses the access token to identify the user, then performs a database lookup
+    so that downstream routes can work with the persisted user record.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    token_data = User.verify_token(token)
+    if token_data is None:
+        raise credentials_exception
+
+    user_id = None
+    if isinstance(token_data, dict):
+        user_id = token_data.get("sub")
+    elif isinstance(token_data, UUID):
+        user_id = token_data
+
+    if user_id is None:
+        raise credentials_exception
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user"
+        )
+
+    return user
