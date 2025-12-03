@@ -56,3 +56,19 @@ def test_password_update_validator_errors():
             confirm_new_password="Mismatch123!",
         )
     assert "New password and confirmation do not match" in str(exc2.value)
+
+    weak_passwords = [
+        ("short1!", "at least 8 characters"),
+        ("alllowercase1!", "uppercase"),
+        ("ALLUPPERCASE1!", "lowercase"),
+        ("NoDigits!!", "digit"),
+        ("NoSpecial123", "special character"),
+    ]
+    for pwd, snippet in weak_passwords:
+        with pytest.raises(ValidationError) as exc3:
+            PasswordUpdate(
+                current_password="OldPass123!",
+                new_password=pwd,
+                confirm_new_password=pwd,
+            )
+        assert snippet in str(exc3.value)

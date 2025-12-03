@@ -283,6 +283,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const newPassword = formData.get('new_password') || '';
     const confirmPassword = formData.get('confirm_new_password') || '';
 
+    const strengthChecks = [
+      { test: newPassword.length >= 8, message: 'Password must be at least 8 characters long' },
+      { test: /[A-Z]/.test(newPassword), message: 'Password must contain an uppercase letter' },
+      { test: /[a-z]/.test(newPassword), message: 'Password must contain a lowercase letter' },
+      { test: /\d/.test(newPassword), message: 'Password must contain a digit' },
+      { test: /[!@#$%^&*()_\+\-\[\]{}|;:,.<>?]/.test(newPassword), message: 'Password must contain a special character' },
+      { test: newPassword !== currentPassword, message: 'New password must be different from current password' },
+    ];
+
+    const failedCheck = strengthChecks.find(check => !check.test);
+    if (failedCheck) {
+      window.showToast?.(failedCheck.message, 'warning');
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       window.showToast?.('New password and confirmation must match', 'warning');
       return;
