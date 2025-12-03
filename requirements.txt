@@ -37,6 +37,7 @@ pytest==8.3.4
 pytest-cov==6.0.0
 pytest-cover==3.0.0
 pytest-coverage==0.0
+pytest-asyncio==0.23.8
 python-dotenv==1.0.1
 python-jose==3.4.0
 python-multipart==0.0.20
