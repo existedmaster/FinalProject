@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from uuid import UUID
+import uuid
 import secrets
 
 from app.core.config import get_settings
@@ -140,7 +141,7 @@ async def get_current_user(
     """
     try:
         payload = await decode_token(token, TokenType.ACCESS)
-        user_id = payload["sub"]
+        user_id = uuid.UUID(str(payload["sub"]))
         
         user = db.query(User).filter(User.id == user_id).first()
         if user is None:
@@ -157,6 +158,8 @@ async def get_current_user(
             
         return user
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
