@@ -53,3 +53,13 @@ def test_get_sessionmaker(mock_settings):
     engine = database.get_engine()
     SessionLocal = database.get_sessionmaker(engine)
     assert isinstance(SessionLocal, sessionmaker)
+
+
+def test_get_db_yields_session(db_session):
+    """Ensure get_db generator yields and closes a session."""
+    from app import database
+
+    gen = database.get_db()
+    session = next(gen)
+    assert isinstance(session, Session)
+    gen.close()

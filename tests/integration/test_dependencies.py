@@ -1,7 +1,11 @@
 import pytest
 from unittest.mock import patch
 from fastapi import HTTPException, status
-from app.auth.dependencies import get_current_user, get_current_active_user
+from app.auth.dependencies import (
+    get_current_user,
+    get_current_active_user,
+    get_current_db_user,
+)
 from app.schemas.user import UserResponse
 from app.models.user import User
 from uuid import uuid4
@@ -103,3 +107,42 @@ def test_get_current_active_user_inactive(mock_verify_token):
 
     assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
     assert exc_info.value.detail == "Inactive user"
+
+
+def test_get_current_db_user_success(db_session, fake_user_data):
+    fake_user_data["password"] = User.hash_password("Pass123!")
+    user = User(**fake_user_data)
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    token = User.create_access_token({"sub": str(user.id)})
+    fetched = get_current_db_user(token=token, db=db_session)
+    assert fetched.id == user.id
+
+
+def test_get_current_db_user_not_found(db_session):
+    token = User.create_access_token({"sub": str(uuid4())})
+    with pytest.raises(HTTPException) as exc_info:
+        get_current_db_user(token=token, db=db_session)
+    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_get_current_db_user_inactive(db_session, fake_user_data):
+    fake_user_data["password"] = User.hash_password("Pass123!")
+    fake_user_data["is_active"] = False
+    user = User(**fake_user_data)
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    token = User.create_access_token({"sub": str(user.id)})
+    with pytest.raises(HTTPException) as exc_info:
+        get_current_db_user(token=token, db=db_session)
+    assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_get_current_db_user_invalid_token(db_session):
+    with pytest.raises(HTTPException) as exc_info:
+        get_current_db_user(token="badtoken", db=db_session)
+    assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED

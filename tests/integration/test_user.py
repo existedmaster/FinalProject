@@ -325,3 +325,18 @@ def test_error_handling():
             session.execute(text("INVALID SQL"))
     assert "INVALID SQL" in str(exc_info.value)
 
+
+def test_hashed_password_init_alias():
+    """Ensure __init__ converts hashed_password argument."""
+    raw = create_fake_user()
+    hashed = User.hash_password("AliasPass123!")
+    user = User(
+        first_name=raw["first_name"],
+        last_name=raw["last_name"],
+        email=raw["email"],
+        username=raw["username"],
+        hashed_password=hashed,
+    )
+    assert user.password == hashed
+    assert user.hashed_password == hashed
+

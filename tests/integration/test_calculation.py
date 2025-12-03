@@ -135,6 +135,12 @@ def test_invalid_inputs_for_addition():
     with pytest.raises(ValueError, match="Inputs must be a list of numbers."):
         addition.get_result()
 
+def test_addition_requires_two_numbers():
+    """Addition should reject lists with fewer than two numbers."""
+    addition = Addition(user_id=dummy_user_id(), inputs=[5])
+    with pytest.raises(ValueError, match="at least two numbers"):
+        addition.get_result()
+
 def test_invalid_inputs_for_subtraction():
     """
     Test that providing fewer than two numbers to Subtraction.get_result raises a ValueError.
@@ -143,10 +149,22 @@ def test_invalid_inputs_for_subtraction():
     with pytest.raises(ValueError, match="Inputs must be a list with at least two numbers."):
         subtraction.get_result()
 
+def test_invalid_inputs_for_multiplication():
+    """Multiplication should reject lists with fewer than two numbers."""
+    multiplication = Multiplication(user_id=dummy_user_id(), inputs=[2])
+    with pytest.raises(ValueError, match="at least two numbers"):
+        multiplication.get_result()
+
 def test_invalid_inputs_for_division():
     """
     Test that providing fewer than two numbers to Division.get_result raises a ValueError.
     """
     division = Division(user_id=dummy_user_id(), inputs=[10])
     with pytest.raises(ValueError, match="Inputs must be a list with at least two numbers."):
+        division.get_result()
+
+def test_division_requires_list_type():
+    """Division should reject non-list inputs."""
+    division = Division(user_id=dummy_user_id(), inputs="bad")
+    with pytest.raises(ValueError, match="Inputs must be a list of numbers."):
         division.get_result()
