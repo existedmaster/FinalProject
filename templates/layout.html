@@ -56,15 +56,22 @@
             </svg>
             <span class="text-xl font-bold text-white">Calculations App</span>
           </a>
-        </div>
+      </div>
   
-        <!-- Right side: user greeting & logout -->
-        <div class="flex items-center space-x-4">
-          <span id="layoutUserWelcome" class="text-sm font-medium text-white hidden md:block"></span>
-          <button
-            id="layoutLogoutBtn"
-            class="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors duration-200 
-                  font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
+      <!-- Right side: user greeting & logout -->
+      <div class="flex items-center space-x-4">
+        <span id="layoutUserWelcome" class="text-sm font-medium text-white hidden md:block"></span>
+        <a
+          id="layoutProfileLink"
+          href="/profile"
+          class="hidden px-3 py-2 rounded-md text-white bg-white/10 hover:bg-white/20 transition-colors duration-200 font-medium"
+        >
+          Profile
+        </a>
+        <button
+          id="layoutLogoutBtn"
+          class="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors duration-200 
+                font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 flex items-center"
           >
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -112,20 +119,31 @@
   <!-- Global Scripts -->
   <script>
   document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('access_token');
+    const username = localStorage.getItem('username');
+
     // Brand link adjustment based on auth status
     const brandLink = document.getElementById('brandLink');
     if (brandLink) {
-      const token = localStorage.getItem('access_token');
       // If user is logged in, set the brand link to /dashboard
       if (token) {
         brandLink.href = '/dashboard';
       }
     }
 
+    // Profile link visibility
+    const profileLink = document.getElementById('layoutProfileLink');
+    if (profileLink) {
+      if (token) {
+        profileLink.classList.remove('hidden');
+      } else {
+        profileLink.classList.add('hidden');
+      }
+    }
+
     // Set user welcome message if logged in
     const welcomeElement = document.getElementById('layoutUserWelcome');
     if (welcomeElement) {
-      const username = localStorage.getItem('username');
       if (username) {
         welcomeElement.textContent = `Welcome, ${username}!`;
         welcomeElement.classList.remove('hidden');
@@ -138,7 +156,6 @@
     const logoutBtn = document.getElementById('layoutLogoutBtn');
     if (logoutBtn) {
       // Only show logout button if user is logged in
-      const token = localStorage.getItem('access_token');
       if (!token) {
         logoutBtn.classList.add('hidden');
       } else {

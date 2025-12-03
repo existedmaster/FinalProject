@@ -1,0 +1,330 @@
+{% extends "layout.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="bg-gradient-to-r from-blue-700 to-indigo-600 text-white p-6 rounded-lg shadow-lg">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-blue-100 font-semibold">Account Center</p>
+        <h1 class="text-2xl md:text-3xl font-semibold mt-1">Manage your profile</h1>
+        <p class="text-sm text-blue-100 mt-2">
+          Keep your contact details current and rotate your password regularly.
+        </p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span id="lastUpdatedBadge" class="px-3 py-1 bg-white/10 rounded-full text-sm border border-white/20">
+          Updated moments ago
+        </span>
+        <a href="/dashboard" class="inline-flex items-center px-4 py-2 bg-white text-blue-700 font-semibold rounded-md shadow-sm hover:shadow-md transition">
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-100">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 flex items-center justify-center text-white text-xl font-semibold" id="profileInitial">
+          U
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Signed in as</p>
+          <p id="profileUsername" class="text-xl font-semibold text-gray-800">username</p>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Email</span>
+          <span id="profileEmail" class="text-sm font-medium text-gray-800">email@example.com</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Status</span>
+          <span id="profileStatus" class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Member since</span>
+          <span id="profileCreated" class="text-sm font-medium text-gray-800">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Last updated</span>
+          <span id="profileUpdated" class="text-sm font-medium text-gray-800">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-100">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800">Profile details</h2>
+            <p class="text-sm text-gray-500 mt-1">Update your name, username, or email address.</p>
+          </div>
+          <span id="profileFormStatus" class="text-sm text-gray-500"></span>
+        </div>
+
+        <form id="profileForm" class="mt-6 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First name</label>
+              <input type="text" id="first_name" name="first_name" autocomplete="given-name"
+                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+            </div>
+            <div>
+              <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last name</label>
+              <input type="text" id="last_name" name="last_name" autocomplete="family-name"
+                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <input type="text" id="username" name="username" autocomplete="username"
+                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" id="email" name="email" autocomplete="email"
+                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+            </div>
+          </div>
+          <div class="flex items-center justify-end">
+            <button type="submit"
+                    class="inline-flex items-center px-5 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    id="profileSubmit">
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-white shadow-lg rounded-lg p-6 border border-gray-100">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800">Change password</h2>
+            <p class="text-sm text-gray-500 mt-1">Use a strong password that you do not reuse elsewhere.</p>
+          </div>
+          <span id="passwordFormStatus" class="text-sm text-gray-500"></span>
+        </div>
+
+        <form id="passwordForm" class="mt-6 space-y-4">
+          <div>
+            <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Current password</label>
+            <input type="password" id="current_password" name="current_password" autocomplete="current-password"
+                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" required>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New password</label>
+              <input type="password" id="new_password" name="new_password" autocomplete="new-password"
+                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" required>
+            </div>
+            <div>
+              <label for="confirm_new_password" class="block text-sm font-medium text-gray-700 mb-1">Confirm new password</label>
+              <input type="password" id="confirm_new_password" name="confirm_new_password" autocomplete="new-password"
+                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" required>
+            </div>
+          </div>
+          <div class="flex items-center justify-end">
+            <button type="submit"
+                    class="inline-flex items-center px-5 py-2 rounded-md bg-gray-800 text-white font-semibold hover:bg-black transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-700"
+                    id="passwordSubmit">
+              Update password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
+
+  const profileForm = document.getElementById('profileForm');
+  const passwordForm = document.getElementById('passwordForm');
+  const profileSubmit = document.getElementById('profileSubmit');
+  const passwordSubmit = document.getElementById('passwordSubmit');
+
+  const profileUsername = document.getElementById('profileUsername');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileInitial = document.getElementById('profileInitial');
+  const profileStatus = document.getElementById('profileStatus');
+  const profileCreated = document.getElementById('profileCreated');
+  const profileUpdated = document.getElementById('profileUpdated');
+  const lastUpdatedBadge = document.getElementById('lastUpdatedBadge');
+
+  let profileSnapshot = null;
+
+  function formatDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  async function fetchProfile() {
+    try {
+      const res = await fetch('/users/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = '/login';
+        return;
+      }
+
+      if (!res.ok) throw new Error('Unable to load profile');
+      const data = await res.json();
+
+      profileSnapshot = data;
+      profileForm.first_name.value = data.first_name || '';
+      profileForm.last_name.value = data.last_name || '';
+      profileForm.username.value = data.username || '';
+      profileForm.email.value = data.email || '';
+
+      profileUsername.textContent = data.username;
+      profileEmail.textContent = data.email;
+      profileInitial.textContent = data.first_name ? data.first_name[0].toUpperCase() : 'U';
+      profileStatus.textContent = data.is_active ? 'Active' : 'Inactive';
+      profileStatus.className = data.is_active
+        ? 'inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800'
+        : 'inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800';
+
+      profileCreated.textContent = formatDate(data.created_at);
+      profileUpdated.textContent = formatDate(data.updated_at);
+      lastUpdatedBadge.textContent = `Updated ${formatDate(data.updated_at)}`;
+
+      localStorage.setItem('username', data.username);
+      localStorage.setItem('email', data.email);
+    } catch (err) {
+      if (window.showToast) {
+        window.showToast(err.message || 'Unable to load profile', 'error');
+      }
+    }
+  }
+
+  function setButtonLoading(button, loadingText) {
+    if (!button) return;
+    if (!button.dataset.originalText) {
+      button.dataset.originalText = button.innerHTML;
+    }
+    if (loadingText) {
+      button.disabled = true;
+      button.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>${loadingText}`;
+    } else {
+      button.disabled = false;
+      button.innerHTML = button.dataset.originalText;
+    }
+  }
+
+  profileForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(profileForm);
+    const payload = {};
+    ['first_name', 'last_name', 'username', 'email'].forEach((field) => {
+      const value = (formData.get(field) || '').trim();
+      if (value && (!profileSnapshot || value !== profileSnapshot[field])) {
+        payload[field] = value;
+      }
+    });
+
+    if (Object.keys(payload).length === 0) {
+      window.showToast?.('No changes to save', 'info');
+      return;
+    }
+
+    setButtonLoading(profileSubmit, 'Saving...');
+    try {
+      const res = await fetch('/users/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = '/login';
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Unable to update profile');
+      }
+
+      profileSnapshot = data;
+      window.showToast?.('Profile updated successfully', 'success');
+      await fetchProfile();
+    } catch (err) {
+      window.showToast?.(err.message || 'Unable to update profile', 'error');
+    } finally {
+      setButtonLoading(profileSubmit, null);
+    }
+  });
+
+  passwordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(passwordForm);
+    const currentPassword = formData.get('current_password') || '';
+    const newPassword = formData.get('new_password') || '';
+    const confirmPassword = formData.get('confirm_new_password') || '';
+
+    if (newPassword !== confirmPassword) {
+      window.showToast?.('New password and confirmation must match', 'warning');
+      return;
+    }
+
+    setButtonLoading(passwordSubmit, 'Updating...');
+    try {
+      const res = await fetch('/users/me/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_new_password: confirmPassword
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = '/login';
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Unable to update password');
+      }
+
+      passwordForm.reset();
+      window.showToast?.('Password updated successfully', 'success');
+    } catch (err) {
+      window.showToast?.(err.message || 'Unable to update password', 'error');
+    } finally {
+      setButtonLoading(passwordSubmit, null);
+    }
+  });
+
+  fetchProfile();
+});
+</script>
+{% endblock %}
