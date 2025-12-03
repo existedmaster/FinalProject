@@ -1,10 +1,13 @@
 ## FastAPI Calculator Service
 
-* Now with User Profile & Password Change !
-To perfrom a password change or update your profile
+### Now with User Profile & Password Change !
+To perform a password change or update your profile
+
 Register or Login
+
 Select profile button to update your profile or change your password
 
+## Ways to use!
 Run locally with either Docker Compose (recommended) or a local Python environment.
 
 ### Prerequisites
